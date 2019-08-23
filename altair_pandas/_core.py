@@ -30,15 +30,15 @@ class _SeriesPlotter(_PandasPlotter):
             raise NotImplementedError("Multi-indexed data.")
         data = data.copy()
         if not data.name:
-            data.name = 'values'
+            data.name = 'value'
         if not data.index.name:
             data.index.name = 'index'
         return data.reset_index()
 
     def line(self, **kwargs):
         return alt.Chart(self._data).mark_line().encode(
-            x=self._data.columns[0],
-            y=self._data.columns[1],
+            x=alt.X(self._data.columns[0], title=None),
+            y=alt.Y(self._data.columns[1], title=None),
             tooltip=[self._data.columns[0], self._data.columns[1]]
         ).interactive()
 
