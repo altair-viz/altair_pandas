@@ -74,7 +74,7 @@ ENTRYPOINTS         = {
     "pandas_plotting_backends": [
         "altair = altair_pandas",
     ],
-},
+}
 
 
 setup(name=NAME,
