@@ -1,2 +1,2 @@
-altair
-pandas>=0.25
+altair>=3.0
+pandas>=0.25.1
