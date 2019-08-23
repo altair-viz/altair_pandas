@@ -1,6 +1,8 @@
 # altair_pandas
 Altair backend for pandas plotting
 
+[![build status](http://img.shields.io/travis/altair-viz/altair_pandas/master.svg?style=flat)](https://travis-ci.org/altair-viz/altair_pandas)
+
 **Note: this is a work in progress**
 
 ## Installation
