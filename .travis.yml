@@ -25,4 +25,4 @@ install:
 script:
   - flake8 ./;
   - mkdir -p $TEST_DIR
-  - cd $TEST_DIR && python -m pytest --pyargs --doctest-modules altair_pandas;
+  - cd $TEST_DIR && python -m pytest altair_pandas --pyargs --doctest-modules --backend_name=altair;

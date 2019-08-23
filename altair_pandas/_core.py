@@ -72,7 +72,7 @@ class _DataFramePlotter(_PandasPlotter):
         else:
             assert y in self._data.columns
             y_values = [y]
-            
+
         return alt.Chart(self._data).transform_fold(
             y_values, as_=['column', 'value']
         ).mark_line().encode(
@@ -90,6 +90,7 @@ def plot(data, kind='line', **kwargs):
     if hasattr(plotter, kind):
         plotfunc = getattr(plotter, kind)
     else:
-        raise NotImplementedError(f"kind='{kind}' for data of type {type(data)}")
+        raise NotImplementedError(
+            f"kind='{kind}' for data of type {type(data)}")
 
     return plotfunc(**kwargs)

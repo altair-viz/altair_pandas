@@ -91,6 +91,7 @@ setup(name=NAME,
       entrypoints=ENTRYPOINTS,
       include_package_data=True,
       install_requires=INSTALL_REQUIRES,
+      python_requires='>=3',
       classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
