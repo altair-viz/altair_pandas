@@ -23,3 +23,5 @@ data = pd.Series(np.random.randn(100).cumsum())
 data.plot()
 ```
 ![Altair-Pandas Visualization](https://raw.githubusercontent.com/altair-viz/altair_pandas/master/images/example.png)
+
+The goal of this package is to implement all of [Pandas' Plotting API](https://pandas.pydata.org/pandas-docs/stable/user_guide/visualization.html)
