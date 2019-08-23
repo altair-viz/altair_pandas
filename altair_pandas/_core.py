@@ -50,6 +50,9 @@ class _SeriesPlotter(_PandasPlotter):
 
     def area(self, **kwargs):
         return self._xy(mark='area', **kwargs)
+        
+    def scatter(self, **kwargs):
+        raise ValueError("kind='scatter' can only be used for DataFrames.")
 
 
 class _DataFramePlotter(_PandasPlotter):
@@ -89,6 +92,18 @@ class _DataFramePlotter(_PandasPlotter):
             y=alt.Y('value:Q', title=None),
             color=alt.Color('column:N', title=None),
             tooltip=[x] + y_values,
+        ).interactive()
+
+    def scatter(self, x, y, c=None, **kwargs):
+        if x is None or y is None:
+            raise ValueError("kind='scatter' requires 'x' and 'y' arguments.")
+        encodings = {'x': x, 'y': y}
+        if c is not None:
+            encodings['color'] = c
+        columns = list(set(encodings.values()))
+        encodings['tooltip'] = columns
+        return alt.Chart(self._data[columns]).mark_point().encode(
+            **encodings
         ).interactive()
 
 

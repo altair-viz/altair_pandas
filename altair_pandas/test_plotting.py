@@ -29,3 +29,16 @@ def test_dataframe_line_plot(dataframe, with_plotting_backend):
     assert spec['encoding']['y']['field'] == 'value'
     assert spec['encoding']['color']['field'] == 'column'
     assert spec['transform'][0]['fold'] == ['x', 'y']
+
+def test_series_scatter_plot(series, with_plotting_backend):
+    with pytest.raises(ValueError):
+        series.plot.scatter('x', 'y')
+
+def test_dataframe_scatter_plot(dataframe, with_plotting_backend):
+    dataframe['c'] = range(len(dataframe))
+    chart = dataframe.plot.scatter('x', 'y', c='y')
+    spec = chart.to_dict()
+    assert spec['mark'] == 'point'
+    assert spec['encoding']['x']['field'] == 'x'
+    assert spec['encoding']['y']['field'] == 'y'
+    assert spec['encoding']['color']['field'] == 'y'
