@@ -17,7 +17,7 @@ env:
 
 before_install:
   - pip install pip --upgrade;
-  - pip install -U pytest;
+  - pip install -U pytest flake8;
 
 install:
   - pip install -e .;
