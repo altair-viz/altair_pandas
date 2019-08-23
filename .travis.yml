@@ -20,4 +20,4 @@ install:
 
 script:
   - flake8 altair_pandas;
-  - python -m pytest --backend_name=altair altair_pandas;
+  - python -m pytest --backend_name=altair_pandas altair_pandas;
