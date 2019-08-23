@@ -65,10 +65,14 @@ class _DataFramePlotter(_PandasPlotter):
     def line(self, x=None, y=None, **kwargs):
         if x is None:
             x = self._data.columns[0]
+        else:
+            assert x in self._data.columns
         if y is None:
             y_values = list(self._data.columns[1:])
         else:
+            assert y in self._data.columns
             y_values = [y]
+            
         return alt.Chart(self._data).transform_fold(
             y_values, as_=['column', 'value']
         ).mark_line().encode(
