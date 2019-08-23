@@ -11,10 +11,6 @@ matrix:
       dist: xenial
       sudo: true
 
-env:
-  global:
-    - TEST_DIR=/tmp/_altair/
-
 before_install:
   - pip install pip --upgrade;
   - pip install -U pytest flake8;
@@ -24,5 +20,4 @@ install:
 
 script:
   - flake8 altair_pandas;
-  - mkdir -p $TEST_DIR
-  - cd $TEST_DIR && python -m pytest --pyargs --doctest-modules --backend_name=altair altair_pandas;
+  - python -m pytest --backend_name=altair altair_pandas;
