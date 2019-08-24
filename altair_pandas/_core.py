@@ -67,7 +67,7 @@ class _SeriesPlotter(_PandasPlotter):
         return alt.Chart(data).transform_fold(
             list(data.columns), as_=['column', 'value']
         ).mark_boxplot().encode(
-            x=alt.X('column:N', title=''),
+            x=alt.X('column:N', title=None),
             y='value:Q'
         )
 
@@ -151,7 +151,7 @@ class _DataFramePlotter(_PandasPlotter):
         return alt.Chart(data).transform_fold(
             list(data.columns), as_=['column', 'value']
         ).mark_boxplot().encode(
-            x=alt.X('column:N', title=''),
+            x=alt.X('column:N', title=None),
             y='value:Q'
         )
 
