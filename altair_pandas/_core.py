@@ -67,7 +67,9 @@ class _SeriesPlotter(_PandasPlotter):
     def hist(self, bins=True, **kwargs):
         data = self._preprocess_data(with_index=False)
         column = data.columns[0]
-        if isinstance(bins, int):
+        if isinstance(bins, bool):
+            bins = bins
+        elif isinstance(bins, int):
             bins = alt.Bin(maxbins=bins)
         return alt.Chart(data).mark_bar().encode(
             x=alt.X(column, title=None, bin=bins),
@@ -164,7 +166,9 @@ class _DataFramePlotter(_PandasPlotter):
 
     def hist(self, bins=True, stacked=None, **kwargs):
         data = self._preprocess_data(with_index=False)
-        if isinstance(bins, int):
+        if isinstance(bins, bool):
+            bins = bins
+        elif isinstance(bins, int):
             bins = alt.Bin(maxbins=bins)
         return alt.Chart(data).transform_fold(
             list(data.columns), as_=['column', 'value']
