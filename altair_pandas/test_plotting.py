@@ -12,10 +12,11 @@ def dataframe():
     return pd.DataFrame({'x': range(5), 'y': range(5)})
 
 
-def test_series_line_plot(series, with_plotting_backend):
-    chart = series.plot()
+@pytest.mark.parametrize('kind', ['line', 'area', 'bar'])
+def test_series_line_plot(series, kind, with_plotting_backend):
+    chart = series.plot(kind=kind)
     spec = chart.to_dict()
-    assert spec['mark'] == 'line'
+    assert spec['mark'] == kind
     assert spec['encoding']['x']['field'] == 'index'
     assert spec['encoding']['y']['field'] == 'data_name'
 
