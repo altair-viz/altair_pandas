@@ -82,7 +82,7 @@ class _DataFramePlotter(_PandasPlotter):
             data.index.name = 'index'
         return data.reset_index()
 
-    def line(self, x=None, y=None, **kwargs):
+    def _xy(self, mark, x=None, y=None, **kwargs):
         if x is None:
             x = self._data.columns[0]
         else:
@@ -93,14 +93,27 @@ class _DataFramePlotter(_PandasPlotter):
             assert y in self._data.columns
             y_values = [y]
 
-        return alt.Chart(self._data).transform_fold(
+        return alt.Chart(
+            self._data,
+            mark=mark
+        ).transform_fold(
             y_values, as_=['column', 'value']
-        ).mark_line().encode(
+        ).encode(
             x=x,
             y=alt.Y('value:Q', title=None),
             color=alt.Color('column:N', title=None),
             tooltip=[x] + y_values,
         ).interactive()
+
+    def line(self, x=None, y=None, **kwargs):
+        return self._xy('line', x, y, **kwargs)
+
+    def area(self, x=None, y=None, **kwargs):
+        return self._xy('area', x, y, **kwargs)
+
+    # TODO: bars should be grouped, not stacked.
+    def bar(self, x=None, y=None, **kwargs):
+        return self._xy('bar', x, y, **kwargs)
 
     def scatter(self, x, y, c=None, **kwargs):
         if x is None or y is None:

@@ -13,7 +13,7 @@ def dataframe():
 
 
 @pytest.mark.parametrize('kind', ['line', 'area', 'bar'])
-def test_series_line_plot(series, kind, with_plotting_backend):
+def test_series_basic_plot(series, kind, with_plotting_backend):
     chart = series.plot(kind=kind)
     spec = chart.to_dict()
     assert spec['mark'] == kind
@@ -21,10 +21,11 @@ def test_series_line_plot(series, kind, with_plotting_backend):
     assert spec['encoding']['y']['field'] == 'data_name'
 
 
-def test_dataframe_line_plot(dataframe, with_plotting_backend):
-    chart = dataframe.plot()
+@pytest.mark.parametrize('kind', ['line', 'area', 'bar'])
+def test_dataframe_basic_plot(dataframe, kind, with_plotting_backend):
+    chart = dataframe.plot(kind=kind)
     spec = chart.to_dict()
-    assert spec['mark'] == 'line'
+    assert spec['mark'] == kind
     assert spec['encoding']['x']['field'] == 'index'
     assert spec['encoding']['y']['field'] == 'value'
     assert spec['encoding']['color']['field'] == 'column'
