@@ -62,6 +62,15 @@ class _SeriesPlotter(_PandasPlotter):
             y=alt.Y('count()', title='Frequency'),
         )
 
+    def box(self, **kwargs):
+        data = self._data.iloc[:, 1:]
+        return alt.Chart(data).transform_fold(
+            list(data.columns), as_=['column', 'value']
+        ).mark_boxplot().encode(
+            x=alt.X('column:N', title=''),
+            y='value:Q'
+        )
+
 
 class _DataFramePlotter(_PandasPlotter):
     """Functionality for plotting of pandas DataFrames."""
@@ -135,6 +144,15 @@ class _DataFramePlotter(_PandasPlotter):
             x=alt.X('value:Q', title=None, bin=True),
             y=alt.Y('count()', title='Frequency', stack=None),
             color=alt.Color('column:N')
+        )
+
+    def box(self, **kwargs):
+        data = self._data.iloc[:, 1:]
+        return alt.Chart(data).transform_fold(
+            list(data.columns), as_=['column', 'value']
+        ).mark_boxplot().encode(
+            x=alt.X('column:N', title=''),
+            y='value:Q'
         )
 
 

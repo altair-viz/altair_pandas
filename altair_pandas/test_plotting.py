@@ -63,3 +63,14 @@ def test_dataframe_hist(dataframe, with_plotting_backend):
     assert 'field' not in spec['encoding']['y']
     assert spec['encoding']['color']['field'] == 'column'
     assert spec['transform'][0]['fold'] == ['x', 'y']
+
+
+def test_boxplot(series, dataframe, with_plotting_backend):
+    for data in [series, dataframe]:
+        chart = data.plot.box()
+        spec = chart.to_dict()
+        assert spec['mark'] == 'boxplot'
+        assert spec['encoding']['x']['field'] == 'column'
+        assert spec['encoding']['y']['field'] == 'value'
+        fold = ['data_name'] if isinstance(data, pd.Series) else ['x', 'y']
+        assert spec['transform'][0]['fold'] == fold
