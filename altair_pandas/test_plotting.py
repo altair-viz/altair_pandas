@@ -30,9 +30,11 @@ def test_dataframe_line_plot(dataframe, with_plotting_backend):
     assert spec['encoding']['color']['field'] == 'column'
     assert spec['transform'][0]['fold'] == ['x', 'y']
 
+
 def test_series_scatter_plot(series, with_plotting_backend):
     with pytest.raises(ValueError):
         series.plot.scatter('x', 'y')
+
 
 def test_dataframe_scatter_plot(dataframe, with_plotting_backend):
     dataframe['c'] = range(len(dataframe))
@@ -42,3 +44,21 @@ def test_dataframe_scatter_plot(dataframe, with_plotting_backend):
     assert spec['encoding']['x']['field'] == 'x'
     assert spec['encoding']['y']['field'] == 'y'
     assert spec['encoding']['color']['field'] == 'y'
+
+
+def test_series_hist(series, with_plotting_backend):
+    chart = series.plot.hist()
+    spec = chart.to_dict()
+    assert spec['mark'] == 'bar'
+    assert spec['encoding']['x']['field'] == 'data_name'
+    assert 'field' not in spec['encoding']['y']
+
+
+def test_dataframe_hist(dataframe, with_plotting_backend):
+    chart = dataframe.plot.hist()
+    spec = chart.to_dict()
+    assert spec['mark'] == 'bar'
+    assert spec['encoding']['x']['field'] == 'value'
+    assert 'field' not in spec['encoding']['y']
+    assert spec['encoding']['color']['field'] == 'column'
+    assert spec['transform'][0]['fold'] == ['x', 'y']

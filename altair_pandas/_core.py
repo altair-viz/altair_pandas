@@ -50,9 +50,17 @@ class _SeriesPlotter(_PandasPlotter):
 
     def area(self, **kwargs):
         return self._xy(mark='area', **kwargs)
-        
+
     def scatter(self, **kwargs):
         raise ValueError("kind='scatter' can only be used for DataFrames.")
+
+    def hist(self, **kwargs):
+        data = self._data.iloc[:, 1:]
+        column = data.columns[0]
+        return alt.Chart(data).mark_bar().encode(
+            x=alt.X(column, title=None, bin=True),
+            y=alt.Y('count()', title='Frequency'),
+        )
 
 
 class _DataFramePlotter(_PandasPlotter):
@@ -105,6 +113,16 @@ class _DataFramePlotter(_PandasPlotter):
         return alt.Chart(self._data[columns]).mark_point().encode(
             **encodings
         ).interactive()
+
+    def hist(self, **kwargs):
+        data = self._data.iloc[:, 1:]
+        return alt.Chart(data).transform_fold(
+            list(data.columns), as_=['column', 'value']
+        ).mark_bar().encode(
+            x=alt.X('value:Q', title=None, bin=True),
+            y=alt.Y('count()', title='Frequency', stack=None),
+            color=alt.Color('column:N')
+        )
 
 
 def plot(data, kind='line', **kwargs):
