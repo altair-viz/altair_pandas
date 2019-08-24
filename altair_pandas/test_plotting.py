@@ -39,12 +39,13 @@ def test_series_scatter_plot(series, with_plotting_backend):
 
 def test_dataframe_scatter_plot(dataframe, with_plotting_backend):
     dataframe['c'] = range(len(dataframe))
-    chart = dataframe.plot.scatter('x', 'y', c='y')
+    chart = dataframe.plot.scatter('x', 'y', c='y', s='x')
     spec = chart.to_dict()
     assert spec['mark'] == 'point'
     assert spec['encoding']['x']['field'] == 'x'
     assert spec['encoding']['y']['field'] == 'y'
     assert spec['encoding']['color']['field'] == 'y'
+    assert spec['encoding']['size']['field'] == 'x'
 
 
 def test_series_hist(series, with_plotting_backend):
