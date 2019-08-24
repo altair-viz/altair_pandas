@@ -35,12 +35,21 @@ class _SeriesPlotter(_PandasPlotter):
             data.index.name = 'index'
         return data.reset_index()
 
-    def line(self, **kwargs):
-        return alt.Chart(self._data).mark_line().encode(
+    def _xy(self, mark='line', **kwargs):
+        return alt.Chart(self._data, mark=mark).encode(
             x=alt.X(self._data.columns[0], title=None),
             y=alt.Y(self._data.columns[1], title=None),
             tooltip=[self._data.columns[0], self._data.columns[1]]
         ).interactive()
+
+    def line(self, **kwargs):
+        return self._xy(mark='line', **kwargs)
+
+    def bar(self, **kwargs):
+        return self._xy(mark='bar', **kwargs)
+
+    def area(self, **kwargs):
+        return self._xy(mark='area', **kwargs)
 
 
 class _DataFramePlotter(_PandasPlotter):
