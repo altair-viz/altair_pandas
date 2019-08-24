@@ -115,12 +115,14 @@ class _DataFramePlotter(_PandasPlotter):
     def bar(self, x=None, y=None, **kwargs):
         return self._xy('bar', x, y, **kwargs)
 
-    def scatter(self, x, y, c=None, **kwargs):
+    def scatter(self, x, y, c=None, s=None, **kwargs):
         if x is None or y is None:
             raise ValueError("kind='scatter' requires 'x' and 'y' arguments.")
         encodings = {'x': x, 'y': y}
         if c is not None:
             encodings['color'] = c
+        if s is not None:
+            encodings['size'] = s
         columns = list(set(encodings.values()))
         encodings['tooltip'] = columns
         return alt.Chart(self._data[columns]).mark_point().encode(
