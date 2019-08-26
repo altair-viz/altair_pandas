@@ -1,4 +1,5 @@
 import pytest
+import numpy as np
 import pandas as pd
 
 
@@ -22,13 +23,28 @@ def dataframe():
         index=pd.MultiIndex.from_product([['a', 'b', 'c'], [1, 2]])
     )
 ])
-def test_multiindex_series(data, with_plotting_backend):
+def test_multiindex(data, with_plotting_backend):
     chart = data.plot.bar()
     spec = chart.to_dict()
     assert list(chart.data.iloc[:, 0]) == [str(i) for i in data.index]
     assert spec['encoding']['x']['field'] == 'index'
     assert spec['encoding']['x']['type'] == 'nominal'
-    assert spec['encoding']['y']['field'] == 'value'
+
+
+def test_nonstring_column_names(with_plotting_backend):
+    data = pd.DataFrame(np.ones((3, 4)))
+    chart = data.plot.scatter(x=0, y=1, c=2, s=3)
+
+    # Ensure data is not modified
+    assert list(data.columns) == list(range(4))
+    # Ensure chart data has string columns
+    assert set(chart.data.columns) == {str(i) for i in range(4)}
+
+    spec = chart.to_dict()
+    assert spec['encoding']['x']['field'] == '0'
+    assert spec['encoding']['y']['field'] == '1'
+    assert spec['encoding']['color']['field'] == '2'
+    assert spec['encoding']['size']['field'] == '3'
 
 
 @pytest.mark.parametrize('kind', ['line', 'area', 'bar'])

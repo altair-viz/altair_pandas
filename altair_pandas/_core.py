@@ -2,6 +2,10 @@ import altair as alt
 import pandas as pd
 
 
+def _valid_column(column_name):
+    return str(column_name)
+
+
 class _PandasPlotter:
     """Base class for pandas plotting."""
     @classmethod
@@ -23,15 +27,17 @@ class _SeriesPlotter(_PandasPlotter):
 
     def _preprocess_data(self, with_index=True):
         # TODO: do this without copy?
-        data = self._data.copy()
-        if not data.name:
-            data.name = 'value'
+        data = self._data
         if with_index:
             if isinstance(data.index, pd.MultiIndex):
+                data = data.copy()
                 data.index = pd.Index(
                     [str(i) for i in data.index], name=data.index.name)
-            return data.reset_index()
-        return data.to_frame()
+            data = data.reset_index()
+        else:
+            data = data.to_frame()
+        # Column names must all be strings.
+        return data.rename(_valid_column, axis=1)
 
     def _xy(self, mark='line', **kwargs):
         data = self._preprocess_data(with_index=True)
@@ -79,12 +85,11 @@ class _DataFramePlotter(_PandasPlotter):
         self._data = data
 
     def _preprocess_data(self, with_index=True, usecols=None):
-        data = self._data
+        data = self._data.rename(_valid_column, axis=1)
         if usecols is not None:
             data = data[usecols]
         if with_index:
             if isinstance(data.index, pd.MultiIndex):
-                data = data.copy()
                 data.index = pd.Index(
                     [str(i) for i in data.index], name=data.index.name)
             return data.reset_index()
@@ -92,13 +97,17 @@ class _DataFramePlotter(_PandasPlotter):
 
     def _xy(self, mark, x=None, y=None, **kwargs):
         data = self._preprocess_data(with_index=True)
+
         if x is None:
             x = data.columns[0]
         else:
+            x = _valid_column(x)
             assert x in data.columns
+
         if y is None:
             y_values = list(data.columns[1:])
         else:
+            y = _valid_column(y)
             assert y in data.columns
             y_values = [y]
 
@@ -127,11 +136,11 @@ class _DataFramePlotter(_PandasPlotter):
     def scatter(self, x, y, c=None, s=None, **kwargs):
         if x is None or y is None:
             raise ValueError("kind='scatter' requires 'x' and 'y' arguments.")
-        encodings = {'x': x, 'y': y}
+        encodings = {'x': _valid_column(x), 'y': _valid_column(y)}
         if c is not None:
-            encodings['color'] = c
+            encodings['color'] = _valid_column(c)
         if s is not None:
-            encodings['size'] = s
+            encodings['size'] = _valid_column(s)
         columns = list(set(encodings.values()))
         data = self._preprocess_data(with_index=False, usecols=columns)
         encodings['tooltip'] = columns
