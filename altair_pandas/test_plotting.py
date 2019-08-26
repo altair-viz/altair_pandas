@@ -51,8 +51,8 @@ def test_nonstring_column_names(with_plotting_backend):
 def test_series_basic_plot(series, kind, with_plotting_backend):
     chart = series.plot(kind=kind)
     spec = chart.to_dict()
-    if isinstance(spec['mark'], dict):
-        assert spec['mark']['type'] == kind
+    if kind == 'bar':
+        assert spec['mark'] == {'type': 'bar', 'orient': 'vertical'}
     else:
         assert spec['mark'] == kind
     assert spec['encoding']['x']['field'] == 'index'
@@ -63,8 +63,8 @@ def test_series_basic_plot(series, kind, with_plotting_backend):
 def test_dataframe_basic_plot(dataframe, kind, with_plotting_backend):
     chart = dataframe.plot(kind=kind)
     spec = chart.to_dict()
-    if isinstance(spec['mark'], dict):
-        assert spec['mark']['type'] == kind
+    if kind == 'bar':
+        assert spec['mark'] == {'type': 'bar', 'orient': 'vertical'}
     else:
         assert spec['mark'] == kind
     assert spec['encoding']['x']['field'] == 'index'
@@ -76,7 +76,7 @@ def test_dataframe_basic_plot(dataframe, kind, with_plotting_backend):
 def test_series_barh(series, with_plotting_backend):
     chart = series.plot.barh()
     spec = chart.to_dict()
-    assert spec['mark'] == {'type': 'bar', 'orient': 'vertical'}
+    assert spec['mark'] == {'type': 'bar', 'orient': 'horizontal'}
     assert spec['encoding']['y']['field'] == 'index'
     assert spec['encoding']['x']['field'] == 'data_name'
 
@@ -84,7 +84,7 @@ def test_series_barh(series, with_plotting_backend):
 def test_dataframe_barh(dataframe, with_plotting_backend):
     chart = dataframe.plot.barh()
     spec = chart.to_dict()
-    assert spec['mark'] == {'type': 'bar', 'orient': 'vertical'}
+    assert spec['mark'] == {'type': 'bar', 'orient': 'horizontal'}
     assert spec['encoding']['y']['field'] == 'index'
     assert spec['encoding']['x']['field'] == 'value'
     assert spec['encoding']['color']['field'] == 'column'

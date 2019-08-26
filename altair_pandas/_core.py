@@ -51,10 +51,10 @@ class _SeriesPlotter(_PandasPlotter):
         return self._xy('line', **kwargs)
 
     def bar(self, **kwargs):
-        return self._xy({'type': 'bar', 'orient': 'horizontal'}, **kwargs)
+        return self._xy({'type': 'bar', 'orient': 'vertical'}, **kwargs)
 
     def barh(self, **kwargs):
-        chart = self._xy({'type': 'bar', 'orient': 'vertical'}, **kwargs)
+        chart = self._xy({'type': 'bar', 'orient': 'horizontal'}, **kwargs)
         chart.encoding.x, chart.encoding.y = chart.encoding.y, chart.encoding.x
         return chart
 
@@ -137,10 +137,11 @@ class _DataFramePlotter(_PandasPlotter):
     # TODO: bars should be grouped, not stacked.
     def bar(self, x=None, y=None, **kwargs):
         return self._xy(
-            {'type': 'bar', 'orient': 'horizontal'}, x, y, **kwargs)
+            {'type': 'bar', 'orient': 'vertical'}, x, y, **kwargs)
 
     def barh(self, x=None, y=None, **kwargs):
-        chart = self._xy({'type': 'bar', 'orient': 'vertical'}, x, y, **kwargs)
+        chart = self._xy(
+            {'type': 'bar', 'orient': 'horizontal'}, x, y, **kwargs)
         chart.encoding.x, chart.encoding.y = chart.encoding.y, chart.encoding.x
         return chart
 
