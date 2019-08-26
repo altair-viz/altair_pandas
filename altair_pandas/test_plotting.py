@@ -12,6 +12,25 @@ def dataframe():
     return pd.DataFrame({'x': range(5), 'y': range(5)})
 
 
+@pytest.mark.parametrize('data', [
+    pd.Series(
+        range(6),
+        index=pd.MultiIndex.from_product([['a', 'b', 'c'], [1, 2]])
+    ),
+    pd.DataFrame(
+        {'x': range(6)},
+        index=pd.MultiIndex.from_product([['a', 'b', 'c'], [1, 2]])
+    )
+])
+def test_multiindex_series(data, with_plotting_backend):
+    chart = data.plot.bar()
+    spec = chart.to_dict()
+    assert list(chart.data.iloc[:, 0]) == [str(i) for i in data.index]
+    assert spec['encoding']['x']['field'] == 'index'
+    assert spec['encoding']['x']['type'] == 'nominal'
+    assert spec['encoding']['y']['field'] == 'value'
+
+
 @pytest.mark.parametrize('kind', ['line', 'area', 'bar'])
 def test_series_basic_plot(series, kind, with_plotting_backend):
     chart = series.plot(kind=kind)

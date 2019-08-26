@@ -22,15 +22,16 @@ class _SeriesPlotter(_PandasPlotter):
         self._data = data
 
     def _preprocess_data(self, with_index=True):
+        # TODO: do this without copy?
+        data = self._data.copy()
+        if not data.name:
+            data.name = 'value'
         if with_index:
-            if isinstance(self._data.index, pd.MultiIndex):
-                raise NotImplementedError("Multi-indexed data.")
-            out = self._data.reset_index()
-        else:
-            out = self._data.to_frame()
-        if not self._data.name:
-            out.columns[-1] = 'value'
-        return out
+            if isinstance(data.index, pd.MultiIndex):
+                data.index = pd.Index(
+                    [str(i) for i in data.index], name=data.index.name)
+            return data.reset_index()
+        return data.to_frame()
 
     def _xy(self, mark='line', **kwargs):
         data = self._preprocess_data(with_index=True)
@@ -82,8 +83,10 @@ class _DataFramePlotter(_PandasPlotter):
         if usecols is not None:
             data = data[usecols]
         if with_index:
-            if isinstance(self._data.index, pd.MultiIndex):
-                raise NotImplementedError("Multi-indexed data.")
+            if isinstance(data.index, pd.MultiIndex):
+                data = data.copy()
+                data.index = pd.Index(
+                    [str(i) for i in data.index], name=data.index.name)
             return data.reset_index()
         return data
 
