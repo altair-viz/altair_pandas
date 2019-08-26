@@ -16,30 +16,28 @@ class _PandasPlotter:
 
 class _SeriesPlotter(_PandasPlotter):
     """Functionality for plotting of pandas Series."""
-    data_class = pd.Series
-
     def __init__(self, data):
-        self._raw_data = data
-        self._data = self._preprocess(data)
-
-    @staticmethod
-    def _preprocess(data):
         if not isinstance(data, pd.Series):
             raise ValueError(f"data: expected pd.Series; got {type(data)}")
-        if isinstance(data.index, pd.MultiIndex):
-            raise NotImplementedError("Multi-indexed data.")
-        data = data.copy()
-        if not data.name:
-            data.name = 'value'
-        if not data.index.name:
-            data.index.name = 'index'
-        return data.reset_index()
+        self._data = data
+
+    def _preprocess_data(self, with_index=True):
+        if with_index:
+            if isinstance(self._data.index, pd.MultiIndex):
+                raise NotImplementedError("Multi-indexed data.")
+            out = self._data.reset_index()
+        else:
+            out = self._data.to_frame()
+        if not self._data.name:
+            out.columns[-1] = 'value'
+        return out
 
     def _xy(self, mark='line', **kwargs):
-        return alt.Chart(self._data, mark=mark).encode(
-            x=alt.X(self._data.columns[0], title=None),
-            y=alt.Y(self._data.columns[1], title=None),
-            tooltip=[self._data.columns[0], self._data.columns[1]]
+        data = self._preprocess_data(with_index=True)
+        return alt.Chart(data, mark=mark).encode(
+            x=alt.X(data.columns[0], title=None),
+            y=alt.Y(data.columns[1], title=None),
+            tooltip=list(data.columns)
         ).interactive()
 
     def line(self, **kwargs):
@@ -55,7 +53,7 @@ class _SeriesPlotter(_PandasPlotter):
         raise ValueError("kind='scatter' can only be used for DataFrames.")
 
     def hist(self, **kwargs):
-        data = self._data.iloc[:, 1:]
+        data = self._preprocess_data(with_index=False)
         column = data.columns[0]
         return alt.Chart(data).mark_bar().encode(
             x=alt.X(column, title=None, bin=True),
@@ -63,47 +61,46 @@ class _SeriesPlotter(_PandasPlotter):
         )
 
     def box(self, **kwargs):
-        data = self._data.iloc[:, 1:]
+        data = self._preprocess_data(with_index=False)
         return alt.Chart(data).transform_fold(
             list(data.columns), as_=['column', 'value']
         ).mark_boxplot().encode(
             x=alt.X('column:N', title=None),
-            y='value:Q'
+            y='value:Q',
         )
 
 
 class _DataFramePlotter(_PandasPlotter):
     """Functionality for plotting of pandas DataFrames."""
-    data_class = pd.DataFrame
-
     def __init__(self, data):
-        self._raw_data = data
-        self._data = self._preprocess(data)
-
-    @staticmethod
-    def _preprocess(data):
         if not isinstance(data, pd.DataFrame):
             raise ValueError(f"data: expected pd.DataFrame; got {type(data)}")
-        if isinstance(data.index, pd.MultiIndex):
-            raise NotImplementedError("Multi-indexed data.")
-        data = data.copy()
-        if not data.index.name:
-            data.index.name = 'index'
-        return data.reset_index()
+        self._data = data
+
+    def _preprocess_data(self, with_index=True, usecols=None):
+        data = self._data
+        if usecols is not None:
+            data = data[usecols]
+        if with_index:
+            if isinstance(self._data.index, pd.MultiIndex):
+                raise NotImplementedError("Multi-indexed data.")
+            return data.reset_index()
+        return data
 
     def _xy(self, mark, x=None, y=None, **kwargs):
+        data = self._preprocess_data(with_index=True)
         if x is None:
-            x = self._data.columns[0]
+            x = data.columns[0]
         else:
-            assert x in self._data.columns
+            assert x in data.columns
         if y is None:
-            y_values = list(self._data.columns[1:])
+            y_values = list(data.columns[1:])
         else:
-            assert y in self._data.columns
+            assert y in data.columns
             y_values = [y]
 
         return alt.Chart(
-            self._data,
+            data,
             mark=mark
         ).transform_fold(
             y_values, as_=['column', 'value']
@@ -133,13 +130,14 @@ class _DataFramePlotter(_PandasPlotter):
         if s is not None:
             encodings['size'] = s
         columns = list(set(encodings.values()))
+        data = self._preprocess_data(with_index=False, usecols=columns)
         encodings['tooltip'] = columns
-        return alt.Chart(self._data[columns]).mark_point().encode(
+        return alt.Chart(data).mark_point().encode(
             **encodings
         ).interactive()
 
     def hist(self, **kwargs):
-        data = self._data.iloc[:, 1:]
+        data = self._preprocess_data(with_index=False)
         return alt.Chart(data).transform_fold(
             list(data.columns), as_=['column', 'value']
         ).mark_bar().encode(
@@ -149,12 +147,12 @@ class _DataFramePlotter(_PandasPlotter):
         )
 
     def box(self, **kwargs):
-        data = self._data.iloc[:, 1:]
+        data = self._preprocess_data(with_index=False)
         return alt.Chart(data).transform_fold(
             list(data.columns), as_=['column', 'value']
         ).mark_boxplot().encode(
             x=alt.X('column:N', title=None),
-            y='value:Q'
+            y='value:Q',
         )
 
 
