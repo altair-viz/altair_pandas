@@ -39,7 +39,7 @@ class _SeriesPlotter(_PandasPlotter):
         # Column names must all be strings.
         return data.rename(_valid_column, axis=1)
 
-    def _xy(self, mark='line', **kwargs):
+    def _xy(self, mark, **kwargs):
         data = self._preprocess_data(with_index=True)
         return alt.Chart(data, mark=mark).encode(
             x=alt.X(data.columns[0], title=None),
@@ -48,10 +48,15 @@ class _SeriesPlotter(_PandasPlotter):
         ).interactive()
 
     def line(self, **kwargs):
-        return self._xy(mark='line', **kwargs)
+        return self._xy('line', **kwargs)
 
     def bar(self, **kwargs):
-        return self._xy(mark='bar', **kwargs)
+        return self._xy({'type': 'bar', 'orient': 'horizontal'}, **kwargs)
+
+    def barh(self, **kwargs):
+        chart = self._xy({'type': 'bar', 'orient': 'vertical'}, **kwargs)
+        chart.encoding.x, chart.encoding.y = chart.encoding.y, chart.encoding.x
+        return chart
 
     def area(self, **kwargs):
         return self._xy(mark='area', **kwargs)
@@ -131,7 +136,13 @@ class _DataFramePlotter(_PandasPlotter):
 
     # TODO: bars should be grouped, not stacked.
     def bar(self, x=None, y=None, **kwargs):
-        return self._xy('bar', x, y, **kwargs)
+        return self._xy(
+            {'type': 'bar', 'orient': 'horizontal'}, x, y, **kwargs)
+
+    def barh(self, x=None, y=None, **kwargs):
+        chart = self._xy({'type': 'bar', 'orient': 'vertical'}, x, y, **kwargs)
+        chart.encoding.x, chart.encoding.y = chart.encoding.y, chart.encoding.x
+        return chart
 
     def scatter(self, x, y, c=None, s=None, **kwargs):
         if x is None or y is None:
