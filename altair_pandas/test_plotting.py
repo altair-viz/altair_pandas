@@ -108,30 +108,30 @@ def test_dataframe_scatter_plot(dataframe, with_plotting_backend):
     assert spec["encoding"]["size"]["field"] == "x"
 
 
-@pytest.mark.parametrize('bins', [None, 10])
+@pytest.mark.parametrize("bins", [None, 10])
 def test_series_hist(series, bins, with_plotting_backend):
     chart = series.plot.hist(bins=bins)
     spec = chart.to_dict()
-    assert spec['mark'] == 'bar'
-    assert spec['encoding']['x']['field'] == 'data_name'
-    assert 'field' not in spec['encoding']['y']
-    exp_bin = True if bins is None else {'maxbins': bins}
-    assert spec['encoding']['x']['bin'] == exp_bin
+    assert spec["mark"] == "bar"
+    assert spec["encoding"]["x"]["field"] == "data_name"
+    assert "field" not in spec["encoding"]["y"]
+    exp_bin = True if bins is None else {"maxbins": bins}
+    assert spec["encoding"]["x"]["bin"] == exp_bin
 
 
-@pytest.mark.parametrize('bins', [None, 10])
-@pytest.mark.parametrize('stacked', [None, True, False])
+@pytest.mark.parametrize("bins", [None, 10])
+@pytest.mark.parametrize("stacked", [None, True, False])
 def test_dataframe_hist(dataframe, bins, stacked, with_plotting_backend):
     chart = dataframe.plot.hist(bins=bins, stacked=stacked)
     spec = chart.to_dict()
-    assert spec['mark'] == 'bar'
-    assert spec['encoding']['x']['field'] == 'value'
-    assert 'field' not in spec['encoding']['y']
-    assert spec['encoding']['color']['field'] == 'column'
-    assert spec['transform'][0]['fold'] == ['x', 'y']
-    exp_bin = True if bins is None else {'maxbins': bins}
-    assert spec['encoding']['x']['bin'] == exp_bin
-    assert spec['encoding']['y']['stack'] == (True if stacked else stacked)
+    assert spec["mark"] == "bar"
+    assert spec["encoding"]["x"]["field"] == "value"
+    assert "field" not in spec["encoding"]["y"]
+    assert spec["encoding"]["color"]["field"] == "column"
+    assert spec["transform"][0]["fold"] == ["x", "y"]
+    exp_bin = True if bins is None else {"maxbins": bins}
+    assert spec["encoding"]["x"]["bin"] == exp_bin
+    assert spec["encoding"]["y"]["stack"] == (True if stacked else stacked)
 
 
 def test_series_boxplot(series, with_plotting_backend):

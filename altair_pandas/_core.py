@@ -78,9 +78,13 @@ class _SeriesPlotter(_PandasPlotter):
             bins = alt.Bin(maxbins=bins)
         elif bins is None:
             bins = True
-        return alt.Chart(data).mark_bar().encode(
-            x=alt.X(column, title=None, bin=bins),
-            y=alt.Y('count()', title='Frequency'),
+        return (
+            alt.Chart(data)
+            .mark_bar()
+            .encode(
+                x=alt.X(column, title=None, bin=bins),
+                y=alt.Y("count()", title="Frequency"),
+            )
         )
 
     def box(self, **kwargs):
@@ -175,12 +179,15 @@ class _DataFramePlotter(_PandasPlotter):
             bins = alt.Bin(maxbins=bins)
         elif bins is None:
             bins = True
-        return alt.Chart(data).transform_fold(
-            list(data.columns), as_=['column', 'value']
-        ).mark_bar().encode(
-            x=alt.X('value:Q', title=None, bin=bins),
-            y=alt.Y('count()', title='Frequency', stack=stacked),
-            color=alt.Color('column:N')
+        return (
+            alt.Chart(data)
+            .transform_fold(list(data.columns), as_=["column", "value"])
+            .mark_bar()
+            .encode(
+                x=alt.X("value:Q", title=None, bin=bins),
+                y=alt.Y("count()", title="Frequency", stack=stacked),
+                color=alt.Color("column:N"),
+            )
         )
 
     def box(self, **kwargs):
