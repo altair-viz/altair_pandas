@@ -37,7 +37,7 @@ class _SeriesPlotter(_PandasPlotter):
         else:
             data = data.to_frame()
         # Column names must all be strings.
-        return data.rename(_valid_column, axis=1)
+        return data.rename(columns=_valid_column)
 
     def _xy(self, mark, **kwargs):
         data = self._preprocess_data(with_index=True)
@@ -90,7 +90,7 @@ class _DataFramePlotter(_PandasPlotter):
         self._data = data
 
     def _preprocess_data(self, with_index=True, usecols=None):
-        data = self._data.rename(_valid_column, axis=1)
+        data = self._data.rename(columns=_valid_column)
         if usecols is not None:
             data = data[usecols]
         if with_index:
