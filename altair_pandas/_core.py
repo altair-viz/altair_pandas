@@ -64,11 +64,15 @@ class _SeriesPlotter(_PandasPlotter):
     def scatter(self, **kwargs):
         raise ValueError("kind='scatter' can only be used for DataFrames.")
 
-    def hist(self, **kwargs):
+    def hist(self, bins=None, **kwargs):
         data = self._preprocess_data(with_index=False)
         column = data.columns[0]
+        if isinstance(bins, int):
+            bins = alt.Bin(maxbins=bins)
+        elif bins is None:
+            bins = True
         return alt.Chart(data).mark_bar().encode(
-            x=alt.X(column, title=None, bin=True),
+            x=alt.X(column, title=None, bin=bins),
             y=alt.Y('count()', title='Frequency'),
         )
 
@@ -160,13 +164,17 @@ class _DataFramePlotter(_PandasPlotter):
             **encodings
         ).interactive()
 
-    def hist(self, **kwargs):
+    def hist(self, bins=None, stacked=None, **kwargs):
         data = self._preprocess_data(with_index=False)
+        if isinstance(bins, int):
+            bins = alt.Bin(maxbins=bins)
+        elif bins is None:
+            bins = True
         return alt.Chart(data).transform_fold(
             list(data.columns), as_=['column', 'value']
         ).mark_bar().encode(
-            x=alt.X('value:Q', title=None, bin=True),
-            y=alt.Y('count()', title='Frequency', stack=None),
+            x=alt.X('value:Q', title=None, bin=bins),
+            y=alt.Y('count()', title='Frequency', stack=stacked),
             color=alt.Color('column:N')
         )
 
