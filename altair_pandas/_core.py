@@ -87,6 +87,9 @@ class _SeriesPlotter(_PandasPlotter):
             )
         )
 
+    def hist_series(self, **kwargs):
+        return self.hist(**kwargs)
+
     def box(self, **kwargs):
         data = self._preprocess_data(with_index=False)
         return (
@@ -190,6 +193,19 @@ class _DataFramePlotter(_PandasPlotter):
             )
         )
 
+    def hist_frame(self, grid_columns=2, **kwargs):
+        data = self._preprocess_data(with_index=False)
+        data = data._get_numeric_data()
+        return (
+            alt.Chart(data)
+            .mark_bar()
+            .encode(
+                x=alt.X(alt.repeat("repeat"), type="quantitative", bin=True),
+                y=alt.Y("count()", title="Frequency")
+            )
+            .repeat(repeat=list(data.columns), columns=grid_columns)
+        )
+
     def box(self, **kwargs):
         data = self._preprocess_data(with_index=False)
         return (
@@ -210,3 +226,11 @@ def plot(data, kind="line", **kwargs):
         raise NotImplementedError(f"kind='{kind}' for data of type {type(data)}")
 
     return plotfunc(**kwargs)
+
+
+def hist_frame(data, **kwargs):
+    return plot(data, kind="hist_frame", **kwargs)
+
+
+def hist_series(data, **kwargs):
+    return plot(data, kind="hist_series", **kwargs)
