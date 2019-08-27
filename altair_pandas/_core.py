@@ -71,16 +71,16 @@ class _SeriesPlotter(_PandasPlotter):
     def scatter(self, **kwargs):
         raise ValueError("kind='scatter' can only be used for DataFrames.")
 
-    def hist(self, **kwargs):
+    def hist(self, bins=None, **kwargs):
         data = self._preprocess_data(with_index=False)
         column = data.columns[0]
-        return (
-            alt.Chart(data)
-            .mark_bar()
-            .encode(
-                x=alt.X(column, title=None, bin=True),
-                y=alt.Y("count()", title="Frequency"),
-            )
+        if isinstance(bins, int):
+            bins = alt.Bin(maxbins=bins)
+        elif bins is None:
+            bins = True
+        return alt.Chart(data).mark_bar().encode(
+            x=alt.X(column, title=None, bin=bins),
+            y=alt.Y('count()', title='Frequency'),
         )
 
     def box(self, **kwargs):
@@ -169,17 +169,18 @@ class _DataFramePlotter(_PandasPlotter):
         encodings["tooltip"] = columns
         return alt.Chart(data).mark_point().encode(**encodings).interactive()
 
-    def hist(self, **kwargs):
+    def hist(self, bins=None, stacked=None, **kwargs):
         data = self._preprocess_data(with_index=False)
-        return (
-            alt.Chart(data)
-            .transform_fold(list(data.columns), as_=["column", "value"])
-            .mark_bar()
-            .encode(
-                x=alt.X("value:Q", title=None, bin=True),
-                y=alt.Y("count()", title="Frequency", stack=None),
-                color=alt.Color("column:N"),
-            )
+        if isinstance(bins, int):
+            bins = alt.Bin(maxbins=bins)
+        elif bins is None:
+            bins = True
+        return alt.Chart(data).transform_fold(
+            list(data.columns), as_=['column', 'value']
+        ).mark_bar().encode(
+            x=alt.X('value:Q', title=None, bin=bins),
+            y=alt.Y('count()', title='Frequency', stack=stacked),
+            color=alt.Color('column:N')
         )
 
     def box(self, **kwargs):
