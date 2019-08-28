@@ -134,22 +134,26 @@ def test_dataframe_hist(dataframe, bins, stacked, with_plotting_backend):
     assert spec["encoding"]["y"]["stack"] == (True if stacked else stacked)
 
 
-def test_series_boxplot(series, with_plotting_backend):
-    chart = series.plot.box()
+@pytest.mark.parametrize("vert", [True, False])
+def test_series_boxplot(series, vert, with_plotting_backend):
+    chart = series.plot.box(vert=vert)
     spec = chart.to_dict()
     assert spec["mark"] == "boxplot"
-    assert spec["encoding"]["x"]["field"] == "column"
-    assert spec["encoding"]["y"]["field"] == "value"
     assert spec["transform"][0]["fold"] == ["data_name"]
+    fields = ["column", "value"] if vert else ["value", "column"]
+    assert spec["encoding"]["x"]["field"] == fields[0]
+    assert spec["encoding"]["y"]["field"] == fields[1]
 
 
-def test_dataframe_boxplot(dataframe, with_plotting_backend):
-    chart = dataframe.plot.box()
+@pytest.mark.parametrize("vert", [True, False])
+def test_dataframe_boxplot(dataframe, vert, with_plotting_backend):
+    chart = dataframe.plot.box(vert=vert)
     spec = chart.to_dict()
     assert spec["mark"] == "boxplot"
-    assert spec["encoding"]["x"]["field"] == "column"
-    assert spec["encoding"]["y"]["field"] == "value"
     assert spec["transform"][0]["fold"] == ["x", "y"]
+    fields = ["column", "value"] if vert else ["value", "column"]
+    assert spec["encoding"]["x"]["field"] == fields[0]
+    assert spec["encoding"]["y"]["field"] == fields[1]
 
 
 def test_dataframe_hist_series(series, with_plotting_backend):
