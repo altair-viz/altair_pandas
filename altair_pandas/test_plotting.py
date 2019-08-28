@@ -168,5 +168,5 @@ def test_dataframe_hist_frame(dataframe, with_plotting_backend):
     assert spec["columns"] == 2
     assert spec["spec"]["mark"] == "bar"
     assert spec["spec"]["encoding"]["x"]["field"] == {"repeat": "repeat"}
-    assert spec["spec"]["encoding"]["x"]["bin"] == True
+    assert spec["spec"]["encoding"]["x"]["bin"] is True
     assert "field" not in spec["spec"]["encoding"]["y"]
