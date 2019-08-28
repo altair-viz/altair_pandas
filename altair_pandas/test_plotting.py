@@ -150,3 +150,23 @@ def test_dataframe_boxplot(dataframe, with_plotting_backend):
     assert spec["encoding"]["x"]["field"] == "column"
     assert spec["encoding"]["y"]["field"] == "value"
     assert spec["transform"][0]["fold"] == ["x", "y"]
+
+
+def test_dataframe_hist_series(series, with_plotting_backend):
+    chart = series.hist()
+    spec = chart.to_dict()
+    assert spec["mark"] == "bar"
+    assert spec["encoding"]["x"]["field"] == "data_name"
+    assert "field" not in spec["encoding"]["y"]
+    assert spec["encoding"]["x"]["bin"] == {"maxbins": 10}
+
+
+def test_dataframe_hist_frame(dataframe, with_plotting_backend):
+    chart = dataframe.hist()
+    spec = chart.to_dict()
+    assert spec["repeat"] == ["x", "y"]
+    assert spec["columns"] == 2
+    assert spec["spec"]["mark"] == "bar"
+    assert spec["spec"]["encoding"]["x"]["field"] == {"repeat": "repeat"}
+    assert spec["spec"]["encoding"]["x"]["bin"] == True
+    assert "field" not in spec["spec"]["encoding"]["y"]

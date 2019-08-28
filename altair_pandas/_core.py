@@ -201,7 +201,7 @@ class _DataFramePlotter(_PandasPlotter):
             .mark_bar()
             .encode(
                 x=alt.X(alt.repeat("repeat"), type="quantitative", bin=True),
-                y=alt.Y("count()", title="Frequency")
+                y=alt.Y("count()", title="Frequency"),
             )
             .repeat(repeat=list(data.columns), columns=grid_columns)
         )
