@@ -229,8 +229,8 @@ def plot(data, kind="line", **kwargs):
 
 
 def hist_frame(data, **kwargs):
-    return plot(data, kind="hist_frame", **kwargs)
+    return _PandasPlotter.create(data).hist_frame(**kwargs)
 
 
 def hist_series(data, **kwargs):
-    return plot(data, kind="hist_series", **kwargs)
+    return _PandasPlotter.create(data).hist_series(**kwargs)
