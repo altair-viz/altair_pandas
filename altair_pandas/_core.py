@@ -1,9 +1,51 @@
 import altair as alt
 import pandas as pd
+import numpy as np
 
 
 def _valid_column(column_name):
+    """Return a valid column name."""
     return str(column_name)
+
+
+def _get_layout(panels, layout=None):
+    """Compute the layout for a gridded chart.
+
+    Parameters
+    ----------
+    panels : int
+        Number of panels in the chart.
+    layout : tuple of ints
+        Control the layout. Negative entries will be inferred
+        from the number of panels.
+
+    Returns
+    -------
+    nrows, ncols : int, int
+        number of rows and columns in the resulting layout.
+
+    Examples
+    --------
+    >>> _get_layout(6, (2, 3))
+    (2, 3)
+    >>> _get_layout(6, (1, -1))
+    (1, 6)
+    >>> _get_layout(6, (-1, 2))
+    (3, 2)
+    """
+    if layout is None:
+        layout = (-1, 2)
+    if len(layout) != 2:
+        raise ValueError("layout should have two elements")
+    if layout[0] < 0 and layout[1] < 0:
+        raise ValueError("At least one dimension of layout must be positive")
+    if layout[0] < 0:
+        layout = (int(np.ceil(panels / layout[1])), layout[1])
+    if layout[1] < 0:
+        layout = (layout[0], int(np.ceil(panels / layout[0])))
+    if panels > layout[0] * layout[1]:
+        raise ValueError(f"layout {layout[0]}x{layout[1]} must be larger than {panels}")
+    return layout
 
 
 class _PandasPlotter:
@@ -204,16 +246,20 @@ class _DataFramePlotter(_PandasPlotter):
             )
         )
 
-    def hist_frame(self, grid_columns=2, **kwargs):
-        data = self._preprocess_data(with_index=False)
+    def hist_frame(self, column=None, layout=(-1, 2), **kwargs):
+        if column is not None:
+            if isinstance(column, str):
+                column = [column]
+        data = self._preprocess_data(with_index=False, usecols=column)
         data = data._get_numeric_data()
+        nrows, ncols = _get_layout(data.shape[1], layout)
         return (
             alt.Chart(data, mark=self._get_mark_def('bar', kwargs))
             .encode(
                 x=alt.X(alt.repeat("repeat"), type="quantitative", bin=True),
                 y=alt.Y("count()", title="Frequency"),
             )
-            .repeat(repeat=list(data.columns), columns=grid_columns)
+            .repeat(repeat=list(data.columns), columns=ncols)
         )
 
     def box(self, vert=True, **kwargs):
