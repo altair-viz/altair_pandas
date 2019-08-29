@@ -90,14 +90,17 @@ class _SeriesPlotter(_PandasPlotter):
     def hist_series(self, **kwargs):
         return self.hist(**kwargs)
 
-    def box(self, **kwargs):
+    def box(self, vert=True, **kwargs):
         data = self._preprocess_data(with_index=False)
-        return (
+        chart = (
             alt.Chart(data)
             .transform_fold(list(data.columns), as_=["column", "value"])
             .mark_boxplot()
             .encode(x=alt.X("column:N", title=None), y="value:Q")
         )
+        if not vert:
+            chart.encoding.x, chart.encoding.y = chart.encoding.y, chart.encoding.x
+        return chart
 
 
 class _DataFramePlotter(_PandasPlotter):
@@ -206,14 +209,17 @@ class _DataFramePlotter(_PandasPlotter):
             .repeat(repeat=list(data.columns), columns=grid_columns)
         )
 
-    def box(self, **kwargs):
+    def box(self, vert=True, **kwargs):
         data = self._preprocess_data(with_index=False)
-        return (
+        chart = (
             alt.Chart(data)
             .transform_fold(list(data.columns), as_=["column", "value"])
             .mark_boxplot()
             .encode(x=alt.X("column:N", title=None), y="value:Q")
         )
+        if not vert:
+            chart.encoding.x, chart.encoding.y = chart.encoding.y, chart.encoding.x
+        return chart
 
 
 def plot(data, kind="line", **kwargs):
