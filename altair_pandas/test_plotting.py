@@ -55,7 +55,7 @@ def test_series_basic_plot(series, kind, with_plotting_backend):
     if kind == "bar":
         assert spec["mark"] == {"type": "bar", "orient": "vertical"}
     else:
-        assert spec["mark"] == kind
+        assert spec["mark"] == {"type": kind}
     assert spec["encoding"]["x"]["field"] == "index"
     assert spec["encoding"]["y"]["field"] == "data_name"
 
@@ -67,7 +67,7 @@ def test_dataframe_basic_plot(dataframe, kind, with_plotting_backend):
     if kind == "bar":
         assert spec["mark"] == {"type": "bar", "orient": "vertical"}
     else:
-        assert spec["mark"] == kind
+        assert spec["mark"] == {"type": kind}
     assert spec["encoding"]["x"]["field"] == "index"
     assert spec["encoding"]["y"]["field"] == "value"
     assert spec["encoding"]["color"]["field"] == "column"
@@ -101,7 +101,7 @@ def test_dataframe_scatter_plot(dataframe, with_plotting_backend):
     dataframe["c"] = range(len(dataframe))
     chart = dataframe.plot.scatter("x", "y", c="y", s="x")
     spec = chart.to_dict()
-    assert spec["mark"] == "point"
+    assert spec["mark"] == {"type": "point"}
     assert spec["encoding"]["x"]["field"] == "x"
     assert spec["encoding"]["y"]["field"] == "y"
     assert spec["encoding"]["color"]["field"] == "y"
@@ -112,7 +112,7 @@ def test_dataframe_scatter_plot(dataframe, with_plotting_backend):
 def test_series_hist(series, bins, with_plotting_backend):
     chart = series.plot.hist(bins=bins)
     spec = chart.to_dict()
-    assert spec["mark"] == "bar"
+    assert spec["mark"] == {"type": "bar"}
     assert spec["encoding"]["x"]["field"] == "data_name"
     assert "field" not in spec["encoding"]["y"]
     exp_bin = True if bins is None else {"maxbins": bins}
@@ -124,7 +124,7 @@ def test_series_hist(series, bins, with_plotting_backend):
 def test_dataframe_hist(dataframe, bins, stacked, with_plotting_backend):
     chart = dataframe.plot.hist(bins=bins, stacked=stacked)
     spec = chart.to_dict()
-    assert spec["mark"] == "bar"
+    assert spec["mark"] == {"type": "bar"}
     assert spec["encoding"]["x"]["field"] == "value"
     assert "field" not in spec["encoding"]["y"]
     assert spec["encoding"]["color"]["field"] == "column"
@@ -159,7 +159,7 @@ def test_dataframe_boxplot(dataframe, vert, with_plotting_backend):
 def test_dataframe_hist_series(series, with_plotting_backend):
     chart = series.hist()
     spec = chart.to_dict()
-    assert spec["mark"] == "bar"
+    assert spec["mark"] == {"type": "bar"}
     assert spec["encoding"]["x"]["field"] == "data_name"
     assert "field" not in spec["encoding"]["y"]
     assert spec["encoding"]["x"]["bin"] == {"maxbins": 10}
@@ -170,7 +170,25 @@ def test_dataframe_hist_frame(dataframe, with_plotting_backend):
     spec = chart.to_dict()
     assert spec["repeat"] == ["x", "y"]
     assert spec["columns"] == 2
-    assert spec["spec"]["mark"] == "bar"
+    assert spec["spec"]["mark"] == {"type": "bar"}
     assert spec["spec"]["encoding"]["x"]["field"] == {"repeat": "repeat"}
     assert spec["spec"]["encoding"]["x"]["bin"] is True
     assert "field" not in spec["spec"]["encoding"]["y"]
+
+
+@pytest.mark.parametrize('kind', ['hist', 'line', 'bar', 'barh'])
+def test_dataframe_mark_properties(dataframe, kind, with_plotting_backend):
+    chart = dataframe.plot(kind=kind, alpha=0.5, color='red')
+    spec = chart.to_dict()
+    assert spec['mark']['type'] == ('bar' if kind in ('barh', 'hist') else kind)
+    assert spec['mark']['opacity'] == 0.5
+    assert spec['mark']['color'] == 'red'
+
+
+@pytest.mark.parametrize('kind', ['hist', 'line', 'bar', 'barh'])
+def test_series_mark_properties(series, kind, with_plotting_backend):
+    chart = series.plot(kind=kind, alpha=0.5, color='red')
+    spec = chart.to_dict()
+    assert spec['mark']['type'] == ('bar' if kind in ('barh', 'hist') else kind)
+    assert spec['mark']['opacity'] == 0.5
+    assert spec['mark']['color'] == 'red'

@@ -18,6 +18,15 @@ class _PandasPlotter:
         else:
             raise NotImplementedError(f"data of type {type(data)}")
 
+    def _get_mark_def(self, mark, kwargs):
+        if isinstance(mark, str):
+            mark = {'type': mark}
+        if isinstance(kwargs.get('alpha'), float):
+            mark['opacity'] = kwargs.pop('alpha')
+        if isinstance(kwargs.get('color'), str):
+            mark['color'] = kwargs.pop('color')
+        return mark
+
 
 class _SeriesPlotter(_PandasPlotter):
     """Functionality for plotting of pandas Series."""
@@ -45,7 +54,7 @@ class _SeriesPlotter(_PandasPlotter):
     def _xy(self, mark, **kwargs):
         data = self._preprocess_data(with_index=True)
         return (
-            alt.Chart(data, mark=mark)
+            alt.Chart(data, mark=self._get_mark_def(mark, kwargs))
             .encode(
                 x=alt.X(data.columns[0], title=None),
                 y=alt.Y(data.columns[1], title=None),
@@ -79,8 +88,7 @@ class _SeriesPlotter(_PandasPlotter):
         elif bins is None:
             bins = True
         return (
-            alt.Chart(data)
-            .mark_bar()
+            alt.Chart(data, mark=self._get_mark_def('bar', kwargs))
             .encode(
                 x=alt.X(column, title=None, bin=bins),
                 y=alt.Y("count()", title="Frequency"),
@@ -140,7 +148,7 @@ class _DataFramePlotter(_PandasPlotter):
             y_values = [y]
 
         return (
-            alt.Chart(data, mark=mark)
+            alt.Chart(data, mark=self._get_mark_def(mark, kwargs))
             .transform_fold(y_values, as_=["column", "value"])
             .encode(
                 x=x,
@@ -177,7 +185,8 @@ class _DataFramePlotter(_PandasPlotter):
         columns = list(set(encodings.values()))
         data = self._preprocess_data(with_index=False, usecols=columns)
         encodings["tooltip"] = columns
-        return alt.Chart(data).mark_point().encode(**encodings).interactive()
+        mark = self._get_mark_def('point', kwargs)
+        return alt.Chart(data, mark=mark).encode(**encodings).interactive()
 
     def hist(self, bins=None, stacked=None, **kwargs):
         data = self._preprocess_data(with_index=False)
@@ -186,9 +195,8 @@ class _DataFramePlotter(_PandasPlotter):
         elif bins is None:
             bins = True
         return (
-            alt.Chart(data)
+            alt.Chart(data, mark=self._get_mark_def('bar', kwargs))
             .transform_fold(list(data.columns), as_=["column", "value"])
-            .mark_bar()
             .encode(
                 x=alt.X("value:Q", title=None, bin=bins),
                 y=alt.Y("count()", title="Frequency", stack=stacked),
@@ -200,8 +208,7 @@ class _DataFramePlotter(_PandasPlotter):
         data = self._preprocess_data(with_index=False)
         data = data._get_numeric_data()
         return (
-            alt.Chart(data)
-            .mark_bar()
+            alt.Chart(data, mark=self._get_mark_def('bar', kwargs))
             .encode(
                 x=alt.X(alt.repeat("repeat"), type="quantitative", bin=True),
                 y=alt.Y("count()", title="Frequency"),
