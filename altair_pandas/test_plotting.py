@@ -185,10 +185,10 @@ def test_dataframe_hist_series(series, with_plotting_backend):
 
 
 def test_dataframe_hist_frame(dataframe, with_plotting_backend):
-    chart = dataframe.hist()
+    chart = dataframe.hist(layout=(-1, 1))
     spec = chart.to_dict()
     assert spec["repeat"] == ["x", "y"]
-    assert spec["columns"] == 2
+    assert spec["columns"] == 1
     assert spec["spec"]["mark"] == {"type": "bar"}
     assert spec["spec"]["encoding"]["x"]["field"] == {"repeat": "repeat"}
     assert spec["spec"]["encoding"]["x"]["bin"] is True
