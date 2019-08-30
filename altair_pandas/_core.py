@@ -177,7 +177,7 @@ class _DataFramePlotter(_PandasPlotter):
             return data.reset_index()
         return data
 
-    def _xy(self, mark, x=None, y=None, **kwargs):
+    def _xy(self, mark, x=None, y=None, stacked=False, **kwargs):
         data = self._preprocess_data(with_index=True)
 
         if x is None:
@@ -198,7 +198,7 @@ class _DataFramePlotter(_PandasPlotter):
             .transform_fold(y_values, as_=["column", "value"])
             .encode(
                 x=x,
-                y=alt.Y("value:Q", title=None),
+                y=alt.Y("value:Q", title=None, stack=stacked),
                 color=alt.Color("column:N", title=None),
                 tooltip=[x] + y_values,
             )
@@ -208,8 +208,9 @@ class _DataFramePlotter(_PandasPlotter):
     def line(self, x=None, y=None, **kwargs):
         return self._xy("line", x, y, **kwargs)
 
-    def area(self, x=None, y=None, **kwargs):
-        return self._xy("area", x, y, **kwargs)
+    def area(self, x=None, y=None, stacked=True, **kwargs):
+        mark = "area" if stacked else {"type": "area", "line": True, "opacity": 0.5}
+        return self._xy(mark, x, y, stacked, **kwargs)
 
     # TODO: bars should be grouped, not stacked.
     def bar(self, x=None, y=None, **kwargs):
