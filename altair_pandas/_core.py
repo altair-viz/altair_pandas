@@ -206,7 +206,7 @@ class _DataFramePlotter(_PandasPlotter):
         )
 
         if subplots:
-            nrows, ncols = _get_layout(len(y_values), kwargs.get("layout"))
+            nrows, ncols = _get_layout(len(y_values), kwargs.get("layout", (-1, 1)))
             chart = chart.encode(facet=alt.Facet("column:N", title=None)).properties(
                 columns=ncols
             )
@@ -257,7 +257,7 @@ class _DataFramePlotter(_PandasPlotter):
             raise ValueError("orientation must be 'horizontal' or 'vertical'.")
 
         mark = self._get_mark_def({"type": "bar", "orient": orientation}, kwargs)
-        return (
+        chart = (
             alt.Chart(data, mark=mark)
             .transform_fold(list(data.columns), as_=["column", "value"])
             .encode(
@@ -266,6 +266,14 @@ class _DataFramePlotter(_PandasPlotter):
                 color="column:N",
             )
         )
+
+        if kwargs.get("subplots"):
+            nrows, ncols = _get_layout(data.shape[1], kwargs.get("layout", (-1, 1)))
+            chart = chart.encode(facet=alt.Facet("column:N", title=None)).properties(
+                columns=ncols
+            )
+
+        return chart
 
     def hist_frame(self, column=None, layout=(-1, 2), **kwargs):
         if column is not None:
