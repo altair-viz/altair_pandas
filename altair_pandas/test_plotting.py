@@ -58,33 +58,35 @@ def test_series_basic_plot(series, kind, with_plotting_backend):
     chart = series.plot(kind=kind)
     spec = chart.to_dict()
 
-    expected = {"x": "index", "y": "data_name"}
+    x, y = "x", "y"
     if kind == "bar":
         assert spec["mark"]["orient"] == "vertical"
     if kind == "barh":
         assert spec["mark"]["orient"] == "horizontal"
-        expected["x"], expected["y"] = expected["y"], expected["x"]
+        x, y = y, x
 
     assert spec["mark"]["type"] == _expected_mark(kind)
-    assert spec["encoding"]["x"]["field"] == expected["x"]
-    assert spec["encoding"]["y"]["field"] == expected["y"]
+    assert spec["encoding"][x]["field"] == "index"
+    assert spec["encoding"][y]["field"] == "data_name"
 
 
+@pytest.mark.parametrize("stacked", [True, False])
 @pytest.mark.parametrize("kind", ["line", "area", "bar", "barh"])
-def test_dataframe_basic_plot(dataframe, kind, with_plotting_backend):
-    chart = dataframe.plot(kind=kind)
+def test_dataframe_basic_plot(dataframe, kind, stacked, with_plotting_backend):
+    chart = dataframe.plot(kind=kind, stacked=stacked)
     spec = chart.to_dict()
 
-    expected = {"x": "index", "y": "value"}
+    x, y = "x", "y"
     if kind == "bar":
         assert spec["mark"]["orient"] == "vertical"
     if kind == "barh":
         assert spec["mark"]["orient"] == "horizontal"
-        expected["x"], expected["y"] = expected["y"], expected["x"]
+        x, y = y, x
 
     assert spec["mark"]["type"] == _expected_mark(kind)
-    assert spec["encoding"]["x"]["field"] == expected["x"]
-    assert spec["encoding"]["y"]["field"] == expected["y"]
+    assert spec["encoding"][x]["field"] == "index"
+    assert spec["encoding"][y]["field"] == "value"
+    assert spec["encoding"][y]["stack"] == stacked
     assert spec["encoding"]["color"]["field"] == "column"
     assert spec["transform"][0]["fold"] == ["x", "y"]
 
