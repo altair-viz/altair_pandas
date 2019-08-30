@@ -62,11 +62,11 @@ class _PandasPlotter:
 
     def _get_mark_def(self, mark, kwargs):
         if isinstance(mark, str):
-            mark = {'type': mark}
-        if isinstance(kwargs.get('alpha'), float):
-            mark['opacity'] = kwargs.pop('alpha')
-        if isinstance(kwargs.get('color'), str):
-            mark['color'] = kwargs.pop('color')
+            mark = {"type": mark}
+        if isinstance(kwargs.get("alpha"), float):
+            mark["opacity"] = kwargs.pop("alpha")
+        if isinstance(kwargs.get("color"), str):
+            mark["color"] = kwargs.pop("color")
         return mark
 
 
@@ -122,24 +122,23 @@ class _SeriesPlotter(_PandasPlotter):
     def scatter(self, **kwargs):
         raise ValueError("kind='scatter' can only be used for DataFrames.")
 
-    def hist(self, bins=None, orientation='vertical', **kwargs):
+    def hist(self, bins=None, orientation="vertical", **kwargs):
         data = self._preprocess_data(with_index=False)
         column = data.columns[0]
         if isinstance(bins, int):
             bins = alt.Bin(maxbins=bins)
         elif bins is None:
             bins = True
-        if orientation == 'vertical':
+        if orientation == "vertical":
             Indep, Dep = alt.X, alt.Y
-        elif orientation == 'horizontal':
+        elif orientation == "horizontal":
             Indep, Dep = alt.Y, alt.X
         else:
             raise ValueError("orientation must be 'horizontal' or 'vertical'.")
 
-        mark = self._get_mark_def({'type': 'bar', 'orient': orientation}, kwargs)
+        mark = self._get_mark_def({"type": "bar", "orient": orientation}, kwargs)
         return alt.Chart(data, mark=mark).encode(
-            Indep(column, title=None, bin=bins),
-            Dep("count()", title="Frequency")
+            Indep(column, title=None, bin=bins), Dep("count()", title="Frequency")
         )
 
     def hist_series(self, **kwargs):
@@ -232,23 +231,23 @@ class _DataFramePlotter(_PandasPlotter):
         columns = list(set(encodings.values()))
         data = self._preprocess_data(with_index=False, usecols=columns)
         encodings["tooltip"] = columns
-        mark = self._get_mark_def('point', kwargs)
+        mark = self._get_mark_def("point", kwargs)
         return alt.Chart(data, mark=mark).encode(**encodings).interactive()
 
-    def hist(self, bins=None, stacked=None, orientation='vertical', **kwargs):
+    def hist(self, bins=None, stacked=None, orientation="vertical", **kwargs):
         data = self._preprocess_data(with_index=False)
         if isinstance(bins, int):
             bins = alt.Bin(maxbins=bins)
         elif bins is None:
             bins = True
-        if orientation == 'vertical':
+        if orientation == "vertical":
             Indep, Dep = alt.X, alt.Y
-        elif orientation == 'horizontal':
+        elif orientation == "horizontal":
             Indep, Dep = alt.Y, alt.X
         else:
             raise ValueError("orientation must be 'horizontal' or 'vertical'.")
 
-        mark = self._get_mark_def({'type': 'bar', 'orient': orientation}, kwargs)
+        mark = self._get_mark_def({"type": "bar", "orient": orientation}, kwargs)
         return (
             alt.Chart(data, mark=mark)
             .transform_fold(list(data.columns), as_=["column", "value"])
@@ -267,7 +266,7 @@ class _DataFramePlotter(_PandasPlotter):
         data = data._get_numeric_data()
         nrows, ncols = _get_layout(data.shape[1], layout)
         return (
-            alt.Chart(data, mark=self._get_mark_def('bar', kwargs))
+            alt.Chart(data, mark=self._get_mark_def("bar", kwargs))
             .encode(
                 x=alt.X(alt.repeat("repeat"), type="quantitative", bin=True),
                 y=alt.Y("count()", title="Frequency"),
