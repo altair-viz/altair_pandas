@@ -14,12 +14,8 @@ def dataframe():
 
 
 def _expected_mark(kind):
-    if kind in ['barh', 'hist']:
-        return 'bar'
-    elif kind == 'box':
-        return 'boxplot'
-    else:
-        return kind
+    marks = {"barh": "bar", "hist": "bar", "box": "boxplot"}
+    return marks.get(kind, kind)
 
 
 @pytest.mark.parametrize(
@@ -66,12 +62,12 @@ def test_series_basic_plot(series, kind, with_plotting_backend):
     if kind == "bar":
         assert spec["mark"]["orient"] == "vertical"
     if kind == "barh":
-        assert spec['mark']['orient'] == 'horizontal'
-        expected['x'], expected['y'] = expected['y'], expected['x']
+        assert spec["mark"]["orient"] == "horizontal"
+        expected["x"], expected["y"] = expected["y"], expected["x"]
 
-    assert spec['mark']['type'] == _expected_mark(kind)
-    assert spec["encoding"]["x"]["field"] == expected['x']
-    assert spec["encoding"]["y"]["field"] == expected['y']
+    assert spec["mark"]["type"] == _expected_mark(kind)
+    assert spec["encoding"]["x"]["field"] == expected["x"]
+    assert spec["encoding"]["y"]["field"] == expected["y"]
 
 
 @pytest.mark.parametrize("kind", ["line", "area", "bar", "barh"])
@@ -83,12 +79,12 @@ def test_dataframe_basic_plot(dataframe, kind, with_plotting_backend):
     if kind == "bar":
         assert spec["mark"]["orient"] == "vertical"
     if kind == "barh":
-        assert spec['mark']['orient'] == 'horizontal'
-        expected['x'], expected['y'] = expected['y'], expected['x']
+        assert spec["mark"]["orient"] == "horizontal"
+        expected["x"], expected["y"] = expected["y"], expected["x"]
 
-    assert spec['mark']['type'] == _expected_mark(kind)
-    assert spec["encoding"]["x"]["field"] == expected['x']
-    assert spec["encoding"]["y"]["field"] == expected['y']
+    assert spec["mark"]["type"] == _expected_mark(kind)
+    assert spec["encoding"]["x"]["field"] == expected["x"]
+    assert spec["encoding"]["y"]["field"] == expected["y"]
     assert spec["encoding"]["color"]["field"] == "column"
     assert spec["transform"][0]["fold"] == ["x", "y"]
 
@@ -202,19 +198,19 @@ def test_hist_frame(dataframe, with_plotting_backend):
     assert "field" not in spec["spec"]["encoding"]["y"]
 
 
-@pytest.mark.parametrize('kind', ['hist', 'line', 'bar', 'barh'])
+@pytest.mark.parametrize("kind", ["hist", "line", "bar", "barh"])
 def test_dataframe_mark_properties(dataframe, kind, with_plotting_backend):
-    chart = dataframe.plot(kind=kind, alpha=0.5, color='red')
+    chart = dataframe.plot(kind=kind, alpha=0.5, color="red")
     spec = chart.to_dict()
-    assert spec['mark']['type'] == _expected_mark(kind)
-    assert spec['mark']['opacity'] == 0.5
-    assert spec['mark']['color'] == 'red'
+    assert spec["mark"]["type"] == _expected_mark(kind)
+    assert spec["mark"]["opacity"] == 0.5
+    assert spec["mark"]["color"] == "red"
 
 
-@pytest.mark.parametrize('kind', ['hist', 'line', 'bar', 'barh'])
+@pytest.mark.parametrize("kind", ["hist", "line", "bar", "barh"])
 def test_series_mark_properties(series, kind, with_plotting_backend):
-    chart = series.plot(kind=kind, alpha=0.5, color='red')
+    chart = series.plot(kind=kind, alpha=0.5, color="red")
     spec = chart.to_dict()
-    assert spec['mark']['type'] == _expected_mark(kind)
-    assert spec['mark']['opacity'] == 0.5
-    assert spec['mark']['color'] == 'red'
+    assert spec["mark"]["type"] == _expected_mark(kind)
+    assert spec["mark"]["opacity"] == 0.5
+    assert spec["mark"]["color"] == "red"
