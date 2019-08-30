@@ -14,12 +14,8 @@ def dataframe():
 
 
 def _expected_mark(kind):
-    if kind in ["barh", "hist"]:
-        return "bar"
-    elif kind == "box":
-        return "boxplot"
-    else:
-        return kind
+    marks = {"barh": "bar", "hist": "bar", "box": "boxplot"}
+    return marks.get(kind, kind)
 
 
 @pytest.mark.parametrize(
