@@ -122,19 +122,24 @@ class _SeriesPlotter(_PandasPlotter):
     def scatter(self, **kwargs):
         raise ValueError("kind='scatter' can only be used for DataFrames.")
 
-    def hist(self, bins=None, **kwargs):
+    def hist(self, bins=None, orientation='vertical', **kwargs):
         data = self._preprocess_data(with_index=False)
         column = data.columns[0]
         if isinstance(bins, int):
             bins = alt.Bin(maxbins=bins)
         elif bins is None:
             bins = True
-        return (
-            alt.Chart(data, mark=self._get_mark_def('bar', kwargs))
-            .encode(
-                x=alt.X(column, title=None, bin=bins),
-                y=alt.Y("count()", title="Frequency"),
-            )
+        if orientation == 'vertical':
+            Indep, Dep = alt.X, alt.Y
+        elif orientation == 'horizontal':
+            Indep, Dep = alt.Y, alt.X
+        else:
+            raise ValueError("orientation must be 'horizontal' or 'vertical'.")
+
+        mark = self._get_mark_def({'type': 'bar', 'orient': orientation}, kwargs)
+        return alt.Chart(data, mark=mark).encode(
+            Indep(column, title=None, bin=bins),
+            Dep("count()", title="Frequency")
         )
 
     def hist_series(self, **kwargs):
@@ -230,19 +235,27 @@ class _DataFramePlotter(_PandasPlotter):
         mark = self._get_mark_def('point', kwargs)
         return alt.Chart(data, mark=mark).encode(**encodings).interactive()
 
-    def hist(self, bins=None, stacked=None, **kwargs):
+    def hist(self, bins=None, stacked=None, orientation='vertical', **kwargs):
         data = self._preprocess_data(with_index=False)
         if isinstance(bins, int):
             bins = alt.Bin(maxbins=bins)
         elif bins is None:
             bins = True
+        if orientation == 'vertical':
+            Indep, Dep = alt.X, alt.Y
+        elif orientation == 'horizontal':
+            Indep, Dep = alt.Y, alt.X
+        else:
+            raise ValueError("orientation must be 'horizontal' or 'vertical'.")
+
+        mark = self._get_mark_def({'type': 'bar', 'orient': orientation}, kwargs)
         return (
-            alt.Chart(data, mark=self._get_mark_def('bar', kwargs))
+            alt.Chart(data, mark=mark)
             .transform_fold(list(data.columns), as_=["column", "value"])
             .encode(
-                x=alt.X("value:Q", title=None, bin=bins),
-                y=alt.Y("count()", title="Frequency", stack=stacked),
-                color=alt.Color("column:N"),
+                Indep("value:Q", title=None, bin=bins),
+                Dep("count()", title="Frequency", stack=stacked),
+                color="column:N",
             )
         )
 

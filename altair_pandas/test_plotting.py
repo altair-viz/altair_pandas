@@ -128,29 +128,36 @@ def test_dataframe_scatter_plot(dataframe, with_plotting_backend):
 
 
 @pytest.mark.parametrize("bins", [None, 10])
-def test_series_hist(series, bins, with_plotting_backend):
-    chart = series.plot.hist(bins=bins)
+@pytest.mark.parametrize("orientation", ["vertical", "horizontal"])
+def test_series_hist(series, bins, orientation, with_plotting_backend):
+    chart = series.plot.hist(bins=bins, orientation=orientation)
     spec = chart.to_dict()
-    assert spec["mark"] == {"type": "bar"}
-    assert spec["encoding"]["x"]["field"] == "data_name"
-    assert "field" not in spec["encoding"]["y"]
+    x, y = ("x", "y") if orientation == "vertical" else ("y", "x")
+
+    assert spec["mark"]["type"] == "bar"
+    assert spec["mark"]["orient"] == orientation
+    assert spec["encoding"][x]["field"] == "data_name"
+    assert "field" not in spec["encoding"][y]
     exp_bin = True if bins is None else {"maxbins": bins}
-    assert spec["encoding"]["x"]["bin"] == exp_bin
+    assert spec["encoding"][x]["bin"] == exp_bin
 
 
 @pytest.mark.parametrize("bins", [None, 10])
 @pytest.mark.parametrize("stacked", [None, True, False])
-def test_dataframe_hist(dataframe, bins, stacked, with_plotting_backend):
-    chart = dataframe.plot.hist(bins=bins, stacked=stacked)
+@pytest.mark.parametrize("orientation", ["vertical", "horizontal"])
+def test_dataframe_hist(dataframe, bins, stacked, orientation, with_plotting_backend):
+    chart = dataframe.plot.hist(bins=bins, stacked=stacked, orientation=orientation)
     spec = chart.to_dict()
-    assert spec["mark"] == {"type": "bar"}
-    assert spec["encoding"]["x"]["field"] == "value"
-    assert "field" not in spec["encoding"]["y"]
+    x, y = ("x", "y") if orientation == "vertical" else ("y", "x")
+    assert spec["mark"]["type"] == "bar"
+    assert spec["mark"]["orient"] == orientation
+    assert spec["encoding"][x]["field"] == "value"
+    assert "field" not in spec["encoding"][y]
     assert spec["encoding"]["color"]["field"] == "column"
     assert spec["transform"][0]["fold"] == ["x", "y"]
     exp_bin = True if bins is None else {"maxbins": bins}
-    assert spec["encoding"]["x"]["bin"] == exp_bin
-    assert spec["encoding"]["y"]["stack"] == (True if stacked else stacked)
+    assert spec["encoding"][x]["bin"] == exp_bin
+    assert spec["encoding"][y]["stack"] == (True if stacked else stacked)
 
 
 @pytest.mark.parametrize("vert", [True, False])
@@ -175,16 +182,16 @@ def test_dataframe_boxplot(dataframe, vert, with_plotting_backend):
     assert spec["encoding"]["y"]["field"] == fields[1]
 
 
-def test_dataframe_hist_series(series, with_plotting_backend):
+def test_hist_series(series, with_plotting_backend):
     chart = series.hist()
     spec = chart.to_dict()
-    assert spec["mark"] == {"type": "bar"}
+    assert spec["mark"]["type"] == "bar"
     assert spec["encoding"]["x"]["field"] == "data_name"
     assert "field" not in spec["encoding"]["y"]
     assert spec["encoding"]["x"]["bin"] == {"maxbins": 10}
 
 
-def test_dataframe_hist_frame(dataframe, with_plotting_backend):
+def test_hist_frame(dataframe, with_plotting_backend):
     chart = dataframe.hist(layout=(-1, 1))
     spec = chart.to_dict()
     assert spec["repeat"] == ["x", "y"]
