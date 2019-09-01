@@ -177,7 +177,7 @@ class _DataFramePlotter(_PandasPlotter):
             return data.reset_index()
         return data
 
-    def _xy(self, mark, x=None, y=None, stacked=False, **kwargs):
+    def _xy(self, mark, x=None, y=None, stacked=False, subplots=False, **kwargs):
         data = self._preprocess_data(with_index=True)
 
         if x is None:
@@ -193,7 +193,7 @@ class _DataFramePlotter(_PandasPlotter):
             assert y in data.columns
             y_values = [y]
 
-        return (
+        chart = (
             alt.Chart(data, mark=self._get_mark_def(mark, kwargs))
             .transform_fold(y_values, as_=["column", "value"])
             .encode(
@@ -204,6 +204,14 @@ class _DataFramePlotter(_PandasPlotter):
             )
             .interactive()
         )
+
+        if subplots:
+            nrows, ncols = _get_layout(len(y_values), kwargs.get("layout", (-1, 1)))
+            chart = chart.encode(facet=alt.Facet("column:N", title=None)).properties(
+                columns=ncols
+            )
+
+        return chart
 
     def line(self, x=None, y=None, **kwargs):
         return self._xy("line", x, y, **kwargs)
@@ -249,7 +257,7 @@ class _DataFramePlotter(_PandasPlotter):
             raise ValueError("orientation must be 'horizontal' or 'vertical'.")
 
         mark = self._get_mark_def({"type": "bar", "orient": orientation}, kwargs)
-        return (
+        chart = (
             alt.Chart(data, mark=mark)
             .transform_fold(list(data.columns), as_=["column", "value"])
             .encode(
@@ -258,6 +266,14 @@ class _DataFramePlotter(_PandasPlotter):
                 color="column:N",
             )
         )
+
+        if kwargs.get("subplots"):
+            nrows, ncols = _get_layout(data.shape[1], kwargs.get("layout", (-1, 1)))
+            chart = chart.encode(facet=alt.Facet("column:N", title=None)).properties(
+                columns=ncols
+            )
+
+        return chart
 
     def hist_frame(self, column=None, layout=(-1, 2), **kwargs):
         if column is not None:

@@ -71,9 +71,12 @@ def test_series_basic_plot(series, kind, with_plotting_backend):
 
 
 @pytest.mark.parametrize("stacked", [True, False])
+@pytest.mark.parametrize("subplots", [False, True])
 @pytest.mark.parametrize("kind", ["line", "area", "bar", "barh"])
-def test_dataframe_basic_plot(dataframe, kind, stacked, with_plotting_backend):
-    chart = dataframe.plot(kind=kind, stacked=stacked)
+def test_dataframe_basic_plot(
+    dataframe, kind, stacked, subplots, with_plotting_backend
+):
+    chart = dataframe.plot(kind=kind, stacked=stacked, subplots=subplots)
     spec = chart.to_dict()
 
     x, y = "x", "y"
@@ -89,6 +92,11 @@ def test_dataframe_basic_plot(dataframe, kind, stacked, with_plotting_backend):
     assert spec["encoding"][y]["stack"] == stacked
     assert spec["encoding"]["color"]["field"] == "column"
     assert spec["transform"][0]["fold"] == ["x", "y"]
+    if subplots:
+        assert spec["encoding"]["facet"]["field"] == "column"
+        assert spec["columns"] == 1
+    else:
+        assert "facet" not in spec["encoding"]
 
 
 def test_series_barh(series, with_plotting_backend):
