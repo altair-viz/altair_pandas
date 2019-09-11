@@ -1,6 +1,7 @@
 import pytest
 import numpy as np
 import pandas as pd
+import altair as alt
 
 
 @pytest.fixture
@@ -237,3 +238,97 @@ def test_dataframe_area(dataframe, stacked, with_plotting_backend):
     for k, v in {"x": "index", "y": "value", "color": "column"}.items():
         assert spec["encoding"][k]["field"] == v
     assert spec["transform"][0]["fold"] == ["x", "y"]
+
+
+@pytest.mark.parametrize("alpha", [1.0, 0.2])
+@pytest.mark.parametrize("color", [None, "x", "z"])
+@pytest.mark.parametrize(
+    "tooltip",
+    [
+        None,
+        ["x", "y"],
+        [alt.Tooltip("x", format="$.2f"), alt.Tooltip("z", format=".0%")],
+    ],
+)
+def test_scatter_matrix(dataframe, alpha, color, tooltip, with_plotting_backend):
+    from altair_pandas import scatter_matrix
+
+    dataframe["z"] = ["A", "B", "C", "D", "E"]
+
+    chart = scatter_matrix(dataframe, alpha=alpha, color=color, tooltip=tooltip)
+    spec = chart.to_dict()
+
+    cols = dataframe._get_numeric_data().columns.astype(str).tolist()
+    for k, v in spec["repeat"].items():
+        assert set(v) == set(cols)
+
+    if color is None:
+        assert "color" not in spec["spec"]["encoding"]
+    elif color == "x":
+        assert spec["spec"]["encoding"]["color"] == {
+            "type": "quantitative",
+            "field": "x",
+        }
+
+    assert spec["spec"]["encoding"]["opacity"] == {"value": alpha}
+
+    if tooltip is None:
+        assert set(el["field"] for el in spec["spec"]["encoding"]["tooltip"]) == {
+            "x",
+            "y",
+            "z",
+        }
+    elif tooltip == ["x", "y"]:
+        assert len(spec["spec"]["encoding"]["tooltip"]) == 2
+        assert set(el["field"] for el in spec["spec"]["encoding"]["tooltip"]) == {
+            "x",
+            "y",
+        }
+    else:
+        assert len(spec["spec"]["encoding"]["tooltip"]) == 2
+        assert set(el["field"] for el in spec["spec"]["encoding"]["tooltip"]) == {
+            "x",
+            "z",
+        }
+        assert spec["spec"]["encoding"]["tooltip"][0]["format"] == "$.2f"
+
+
+@pytest.mark.parametrize("colormap", ["viridis", "goldgreen"])
+@pytest.mark.parametrize("color", ["x", "z"])
+def test_scatter_colormap(dataframe, colormap, color, with_plotting_backend):
+    from altair_pandas import scatter_matrix
+
+    if color == "z":
+        dataframe["z"] = ["A", "B", "C", "D", "E"]
+
+    chart = scatter_matrix(dataframe, color=color, colormap=colormap)
+    spec = chart.to_dict()
+
+    assert spec["spec"]["encoding"]["color"]["scale"]["scheme"] == colormap
+
+
+@pytest.mark.parametrize(
+    "indx, data",
+    {
+        "index": pd.DataFrame(
+            {"x": range(6)}, index=pd.MultiIndex.from_product([["a", "b", "c"], [1, 2]])
+        ),
+        "columns": pd.DataFrame(
+            {"x": range(6)}, index=pd.MultiIndex.from_product([["a", "b", "c"], [1, 2]])
+        ).T,
+    }.items(),
+)
+def test_scatter_multiindex(indx, data, with_plotting_backend):
+    from altair_pandas import scatter_matrix
+
+    chart = scatter_matrix(data)
+    spec = chart.to_dict()
+
+    cols = (
+        {"x"}
+        if indx == "index"
+        else ({"('b', 2)", "('b', 1)", "('c', 2)", "('a', 2)", "('c', 1)", "('a', 1)"})
+    )
+
+    for k, v in spec["repeat"].items():
+        assert set(v) == cols
