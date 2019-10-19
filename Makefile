@@ -4,6 +4,8 @@ install:
 	python setup.py install
 
 test :
+	black .
+	flake8 altair_pandas
 	python -m pytest --pyargs --doctest-modules altair_pandas
 
 test-coverage:

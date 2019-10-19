@@ -8,11 +8,12 @@ matrix:
 
 before_install:
   - pip install pip --upgrade;
-  - pip install -U pytest flake8;
+  - pip install -r requirements_dev.txt
 
 install:
   - pip install -e .;
 
 script:
+  - black --check .
   - flake8 altair_pandas;
   - python -m pytest --backend_name=altair altair_pandas;
